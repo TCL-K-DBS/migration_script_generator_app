@@ -134,7 +134,7 @@
       <workItem from="1728022111017" duration="511000" />
       <workItem from="1728022637491" duration="3015000" />
       <workItem from="1728134087592" duration="2838000" />
-      <workItem from="1728276994193" duration="3089000" />
+      <workItem from="1728276994193" duration="4391000" />
     </task>
     <task id="LOCAL-00001" summary="1st coomit">
       <option name="closed" value="true" />
@@ -157,6 +157,6 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/migration_script_generator$main__1_.coverage" NAME="main (1) Coverage Results" MODIFIED="1728024821612" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pythonProject$main.coverage" NAME="main Coverage Results" MODIFIED="1727941555701" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/.venv" />
-    <SUITE FILE_PATH="coverage/migration_script_generator$main.coverage" NAME="main Coverage Results" MODIFIED="1728281500744" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/.venv" />
+    <SUITE FILE_PATH="coverage/migration_script_generator$main.coverage" NAME="main Coverage Results" MODIFIED="1728285635465" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/.venv" />
   </component>
 </project>

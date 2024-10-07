@@ -34,12 +34,15 @@ class LiquibaseChangelogComparer:
             prev_dom = minidom.parse(self.previous_xml_path)
             current_dom = minidom.parse(self.current_xml_path)
 
-            # Get all tables from previous and current XML files
+            # Get all tables and indexes from previous and current XML files
             prev_tables = prev_dom.getElementsByTagName('createTable')
             current_tables = current_dom.getElementsByTagName('createTable')
 
             prev_inserts = prev_dom.getElementsByTagName('insert')
             current_inserts = current_dom.getElementsByTagName('insert')
+
+            prev_indexes = prev_dom.getElementsByTagName('createIndex')
+            current_indexes = current_dom.getElementsByTagName('createIndex')
 
             # Create an in-memory XML structure for migration script
             in_memory_xml = self.create_in_memory_xml()
@@ -52,6 +55,9 @@ class LiquibaseChangelogComparer:
 
             # Handle <insert> changes
             self.handle_insert_changes(prev_inserts, current_inserts, in_memory_xml)
+
+            # Handle <createIndex> and <dropIndex> changes
+            self.handle_index_changes(prev_indexes, current_indexes, in_memory_xml)
 
             # Return the generated in-memory XML as a string
             return in_memory_xml.toprettyxml(indent="  ")
@@ -184,17 +190,71 @@ class LiquibaseChangelogComparer:
                 change_set.appendChild(insert_tag)
                 in_memory_xml.documentElement.appendChild(change_set)
 
+    def handle_index_changes(self, prev_indexes, current_indexes, in_memory_xml):
+        """Handle comparison of createIndex and dropIndex between two XMLs."""
+        for curr_index in current_indexes:
+            table_name = curr_index.getAttribute("tableName")
+            index_name = curr_index.getAttribute("indexName")
+            prev_index_found = False
+
+            for prev_index in prev_indexes:
+                if prev_index.getAttribute("tableName") == table_name and prev_index.getAttribute("indexName") == index_name:
+                    prev_index_found = True
+                    break
+
+            if not prev_index_found:
+                # Add new createIndex changeset
+                change_set = in_memory_xml.createElement("changeSet")
+                change_set.setAttribute("author", "migration")
+                change_set.setAttribute("id", self.increment_and_get_changeset_id(f'create-index-{table_name}-{index_name}'))
+
+                cloned_index = curr_index.cloneNode(True)
+                change_set.appendChild(cloned_index)
+                in_memory_xml.documentElement.appendChild(change_set)
+
+        for prev_index in prev_indexes:
+            table_name = prev_index.getAttribute("tableName")
+            index_name = prev_index.getAttribute("indexName")
+            curr_index_found = False
+
+            for curr_index in current_indexes:
+                if curr_index.getAttribute("tableName") == table_name and curr_index.getAttribute("indexName") == index_name:
+                    curr_index_found = True
+                    break
+
+            if not curr_index_found:
+                # Add dropIndex changeset for indexes present in prev XML but missing in current XML
+                drop_changeset = in_memory_xml.createElement('changeSet')
+                drop_changeset.setAttribute('author', 'migration')
+                drop_changeset.setAttribute('id', self.increment_and_get_changeset_id(f'drop-index-{table_name}-{index_name}'))
+
+                drop_index = in_memory_xml.createElement('dropIndex')
+                drop_index.setAttribute('indexName', index_name)
+                drop_index.setAttribute('tableName', table_name)
+                drop_changeset.appendChild(drop_index)
+
+                in_memory_xml.documentElement.appendChild(drop_changeset)
+
     def get_table_by_name(self, tables, table_name):
-        """Utility function to get a table element by its tableName attribute."""
+        """Return the table element with the specified name, or None if not found."""
         for table in tables:
             if table.getAttribute('tableName') == table_name:
                 return table
         return None
 
-    def column_exists_in_table(self, columns, column):
-        """Utility function to check if a column exists in a table."""
+    def column_exists_in_table(self, table_columns, column):
+        """Check if a column exists in the table's list of columns."""
         column_name = column.getAttribute('name')
-        for col in columns:
-            if col.getAttribute('name') == column_name:
+        for table_column in table_columns:
+            if table_column.getAttribute('name') == column_name:
                 return True
         return False
+
+# # Usage example
+# previous_xml_path = 'previous_changelog.xml'
+# current_xml_path = 'current_changelog.xml'
+# comparer = LiquibaseChangelogComparer(previous_xml_path, current_xml_path)
+# migration_script = comparer.compare_and_generate()
+#
+# if migration_script:
+#     print(migration_script)
