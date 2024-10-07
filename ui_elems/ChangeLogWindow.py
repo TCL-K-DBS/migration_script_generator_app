@@ -1,9 +1,9 @@
 # change_log_window.py
 
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFileDialog
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFileDialog,QMessageBox
 from PyQt5.QtCore import Qt
-from logics.ChangeLogComparator import ChangeLogComparator
+from logics.ChangeLogComparator import LiquibaseChangelogComparer
 
 class ChangeLogWindow(QWidget):
     def __init__(self):
@@ -88,17 +88,32 @@ class ChangeLogWindow(QWidget):
         # Placeholder logic to indicate this function is called
         print(f"Generating migration script from:\nCurrent: {self.current_xml}\nPrevious: {self.previous_xml}")
 
-        previous_changelog_path = self.previous_xml # Replace with the actual path to the previous XML
+        previous_changelog_path = self.previous_xml  # Replace with the actual path to the previous XML
         current_changelog_path = self.current_xml  # Replace with the actual path to the current XML
+
         try:
-            comparator = ChangeLogComparator(previous_changelog_path, current_changelog_path)
-            # comparator.compare_changelogs()
+            comparator = LiquibaseChangelogComparer(previous_changelog_path, current_changelog_path)
             new_changelog = comparator.compare_and_generate()
 
-            # Print the new XML to see the generated migration changelog
-            print(new_changelog)
+            # Open a file dialog for the user to select the export location
+            options = QFileDialog.Options()
+            file_path, _ = QFileDialog.getSaveFileName(self, "Save Migration Script", "",
+                                                       "XML Files (*.xml);;All Files (*)", options=options)
+
+            # If the user selects a file path
+            if file_path:
+                with open(file_path, "w") as file:
+                    file.write(new_changelog)
+
+                # Display success message
+                QMessageBox.information(self, "Success", "Migration script saved successfully!")
+
+            else:
+                print("Save operation was canceled.")
+
         except Exception as e:
             print(f"Error generating migration script: {e}")
+            # QMessageBox.critical(self, "Error", f"Error generating migration script: {e}")
 
 
         # Print the new XML to see the generated migration changelog
