@@ -249,6 +249,7 @@ class LiquibaseChangelogComparer:
             if table_column.getAttribute('name') == column_name:
                 return True
         return False
+    #ggg
 
 # # Usage example
 # previous_xml_path = 'previous_changelog.xml'
